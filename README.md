@@ -1,5 +1,5 @@
 # poohbear
-A very simple golang honeypot for home networks. Integrates with Amazon SES to alert on unexpected TCP connects.
+A very simple golang honeypot for home networks (eg. on a dedicated Raspberry Pi). Integrates with Amazon SES to alert on unexpected TCP connects.
 
 ```
     
@@ -55,7 +55,7 @@ A very simple golang honeypot for home networks. Integrates with Amazon SES to a
 ## Poohbear Honey Pot
 
 - A very simple honey pot for a home network
-- Designed to alert for any unanticipated scans/TCP connect attempts
+- Designed to alert for unanticipated scans/TCP connect attempts in the non-ephemeral range
 - Configurable window to batch alerts into (avoids accidentally spamming yourself)
 - Runs as a standalone binary (for example on a a Raspberry Pi) and sends email alerts 
 - Sniffs TCP connection attempts on an interface using raw sockets without actually opening any ports  (adapted from https://github.com/bisrael8191/sniffer)
@@ -137,3 +137,34 @@ Usage of ./poohbear:
   -whitelist-ports string
         [OPTIONAL] CSV string of ports to never alert on (eg: 22,80,443,8888)
 ```
+
+#### Run as a service with systemd
+
+To run poohbear as a service on raspian linux, for example, put the following as root into `/etc/systemd/system/poohbear.service`
+
+```
+[Unit]
+Description=Poohbear Honeypot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/home/pi/go/src/poohbear/poohbear -email="bob@example.com" -whitelist-macsports="ff:ee:dd:bb:cc:aa|22"
+User=root
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+Then run `systemctl enable poohbear && systemctl start poohbear`
+
+Logs can be viewed with `journalctl -u poohbear`
+
+
+#### Integration with Amazon SES
+
+Follow AWS instructions for setting up your account to send email (https://aws.amazon.com/ses/getting-started/). A simple strategy is to create an low-priv IAM user (can send emails only), and use the generated instance credentials, stored in `~/.aws/credentials`, where poohbear's SES integration will find and use the credentials to send the email. 
