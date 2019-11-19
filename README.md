@@ -167,3 +167,46 @@ Logs can be viewed with `journalctl -u poohbear`
 #### Integration with Amazon SES
 
 Follow AWS instructions for setting up your account to send email (https://aws.amazon.com/ses/getting-started/). A simple strategy is to create an low-priv IAM user (can send emails only), and use the generated instance credentials, stored in `~/.aws/credentials`, where poohbear's SES integration will find and use the credentials to send the email. 
+
+### Other Considerations
+
+#### MAC Address
+
+You may wish to make your honeypot blend better into the network.
+
+Consinder the following arp-scan, in which the honeypot may appear suspicious to an attacker on your network:
+
+```
+arp-scan -l
+Starting arp-scan 1.9.5 with 256 hosts (https://github.com/royhills/arp-scan)                      
+192.168.1.1     db:7a:7b:3a:8:40       (Unknown)                                                                                                                                                      
+192.168.1.118   b8:27:eb:18:e4:6c       Raspberry Pi Foundation                                    
+192.168.1.133   a9:78:ab:2f:fb:45       (Unknown)                                                  
+192.168.1.144   a0:8c:fd:22:17:e6       Hewlett Packard                                            
+```
+
+The Pi's mac address can be spoofed during network setup, so that it won't be clear what kind of device is replying to the arp-scan.
+
+First, pick a random MAC address, for exmample with:
+
+```
+python -c 'import random; print(":".join(["{:x}".format(random.randint(0,256)) for i in range(6)]))'
+
+# 69:b3:4f:fd:12:a4
+```
+
+Then put the resulting mac into the following stanza in /etc/network/interfaces for your target interface (example assuming 69:b3:4f:fd:12:a4 and eth0 below):
+
+```
+auto eth0
+iface eth0 inet dhcp
+    hwaddress ether 69:b3:4f:fd:12:a4
+```
+
+reboot your Pi and the new MAC should show up, not being readily identifiable as a Raspberry Pi to attackers.
+
+#### Hostname
+
+You may also wish to mask your hostname with something generic instead of the default `raspberrypi` that ships with Raspbian linux.
+You can do so on Raspbian linux by editing /etc/hostname and rebooting.
+
