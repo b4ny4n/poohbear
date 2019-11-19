@@ -208,5 +208,5 @@ reboot your Pi and the new MAC should show up, not being readily identifiable as
 #### Hostname
 
 You may also wish to mask your hostname with something generic instead of the default `raspberrypi` that ships with Raspbian linux.
-You can do so on Raspbian linux by editing /etc/hostname and rebooting.
+You can do so by editing /etc/hostname and rebooting.
 
