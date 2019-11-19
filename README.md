@@ -139,7 +139,7 @@ Usage of ./poohbear:
 
 #### Run as a service with systemd
 
-To run poohbear as a service on raspian linux, for example, put the following as root into `/etc/systemd/system/poohbear.service`
+To run poohbear as a service on Raspbian Linux, for example, put the following as root into `/etc/systemd/system/poohbear.service`
 
 ```
 [Unit]
